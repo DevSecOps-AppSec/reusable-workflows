@@ -1,14 +1,10 @@
 name: Secret Scanning Workflow
 
 on:
-  workflow_call:
-    inputs:
-      github_token:
-        description: 'GitHub Token for authentication'
-        required: true
-      gitleaks_license:
-        description: 'Gitleaks license token'
-        required: false
+  workflow_call: # Define this workflow as reusable
+    secrets: # Allows the calling workflow to pass secrets
+      GITHUB_TOKEN: {}
+      GITLEAKS_LICENSE: {}
 
 jobs:
   scan:
@@ -23,5 +19,5 @@ jobs:
       - name: Run Gitleaks scan
         uses: gitleaks/gitleaks-action@v2
         env:
-          GITHUB_TOKEN: ${{ inputs.github_token }}  # Using inputs.github_token instead of secrets
-          GITLEAKS_LICENSE: ${{ inputs.gitleaks_license }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Using secrets directly
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
