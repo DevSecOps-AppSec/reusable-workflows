@@ -3,16 +3,12 @@ name: Secret Scanning Workflow
 on:
   workflow_call:
     inputs:
-      branches:
-        description: 'Branches to trigger secret scanning'
-        required: true
-        default: ['main', 'master']
       github_token:
-       description: 'GitHub Token for authentication'
-       required: true
+        description: 'GitHub Token for authentication'
+        required: true
       gitleaks_license:
-       description: 'Gitleaks license token'
-       required: false
+        description: 'Gitleaks license token'
+        required: false
 
 jobs:
   scan:
