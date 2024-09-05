@@ -15,6 +15,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check Gitleaks License Environment Variable
+        run: echo "Gitleaks License:" ${{ secrets.GITLEAKS_LICENSE }}
+
       - name: Run Gitleaks scan
         uses: gitleaks/gitleaks-action@v2
         env:
