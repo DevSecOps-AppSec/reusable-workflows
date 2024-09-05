@@ -7,6 +7,9 @@ jobs:
   scan:
     name: Gitleaks Secret Scanning
     runs-on: ubuntu-latest
+    env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GITHUB_TOKEN is provided automatically by GitHub
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
