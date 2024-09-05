@@ -19,5 +19,5 @@ jobs:
       - name: Run Gitleaks scan
         uses: gitleaks/gitleaks-action@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Using secrets directly
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Using secrets directly
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
