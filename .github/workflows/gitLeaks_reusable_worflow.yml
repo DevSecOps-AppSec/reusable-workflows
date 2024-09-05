@@ -1,4 +1,4 @@
-name: Secret Scanning Workflow
+name: Gitleaks Reusable Secret Scanning Workflow
 
 on:
   workflow_call:
