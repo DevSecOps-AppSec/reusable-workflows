@@ -2,8 +2,6 @@ name: Secret Scanning Workflow
 
 on:
   workflow_call:
-    secrets:
-      GITLEAKS_LICENSE: {}  # Only include non-system secrets
 
 jobs:
   scan:
