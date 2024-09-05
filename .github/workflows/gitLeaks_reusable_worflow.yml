@@ -2,6 +2,8 @@ name: Secret Scanning Workflow
 
 on:
   workflow_call:
+    secrets:
+      GITLEAKS_LICENSE: {}  # Accept this secret from the caller workflow
 
 jobs:
   scan:
@@ -16,5 +18,5 @@ jobs:
       - name: Run Gitleaks scan
         uses: gitleaks/gitleaks-action@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GITHUB_TOKEN is provided automatically by GitHub
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Using GITHUB_TOKEN from GitHub
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}  # Accessing the license
