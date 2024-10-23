@@ -2,7 +2,6 @@ import requests
 import datetime
 import csv
 import argparse
-import os
 
 # Function to get all repositories in the organization
 def get_all_repos(github_token, org_name):
@@ -39,7 +38,7 @@ def get_all_repos(github_token, org_name):
             creator = get_repo_creator(repo['full_name'], headers)
             has_pre_commit_config = check_pre_commit_config(repo['full_name'], headers)
             has_gitleaks_workflow = check_gitleaks_workflow(repo['full_name'], headers)
-            custom_properties = get_repo_custom_properties(repo['full_name'], headers)  # Fetch "Repo_Type"
+            custom_properties = get_repo_custom_properties(repo['full_name'], headers)
             branch_protection_enabled = check_branch_protection(repo['full_name'], repo['default_branch'], headers)
             repo_list.append({
                 'name': repo['name'],
@@ -54,46 +53,6 @@ def get_all_repos(github_token, org_name):
         page += 1
 
     return repo_list
-
-def compare_with_old_data(new_repo_list, old_file):
-    if not os.path.exists(old_file):
-        print(f"No previous data found. Creating new file '{old_file}'.")
-        write_csv(old_file, new_repo_list)
-        return
-    
-    # Read old data
-    with open(old_file, mode='r') as file:
-        reader = csv.DictReader(file)
-        old_repo_list = list(reader)
-
-    # Check if 'name' field exists in the CSV
-    if not old_repo_list or 'Repo Name' not in old_repo_list[0]:
-        print(f"CSV file does not contain the expected 'Repo Name' field. Please check the file format.")
-        return
-    
-    # Convert old data to a dictionary for easy comparison
-    old_repo_dict = {repo['Repo Name']: repo for repo in old_repo_list}
-    
-    # Check for new repos or changes in existing repos
-    changes = []
-    for new_repo in new_repo_list:
-        old_repo = old_repo_dict.get(new_repo['name'])
-        if not old_repo or old_repo != new_repo:
-            changes.append(new_repo)
-    
-    if changes:
-        print(f"Changes detected. Updating '{old_file}' with new data.")
-        write_csv(old_file, new_repo_list)
-    else:
-        print("No changes detected.")
-
-# Write repository data to CSV file
-def write_csv(file_name, repo_list):
-    with open(file_name, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Repo Name', 'Created At', 'Created By', 'Has .pre-commit-config.yaml', 'Has gitleaks_secret_scan.yml', 'Repo_Type', 'Branch Protection Enabled'])
-        for repo in repo_list:
-            writer.writerow([repo['name'], repo['created_at'], repo['creator'], repo['has_pre_commit_config'], repo['has_gitleaks_workflow'], repo['repo_type'], repo['branch_protection_enabled']])
 
 # Function to get the creator of a repository
 def get_repo_creator(repo_full_name, headers):
@@ -155,15 +114,25 @@ def check_branch_protection(repo_full_name, default_branch, headers):
         return "Unknown"
 
 if __name__ == "__main__":
-    # Parse command-line arguments for the GitHub token and organization name
-    parser = argparse.ArgumentParser(description='Fetch all repositories and their custom properties, comparing them with old data.')
+    # Parse command-line arguments for the GitHub token, organization name, and output file
+    parser = argparse.ArgumentParser(description='Fetch repositories and generate a CSV.')
     parser.add_argument('-pat', '--github_token', type=str, required=True, help='GitHub Personal Access Token')
     parser.add_argument('-org', '--org_name', type=str, required=True, help='GitHub Organization Name')
+    parser.add_argument('-output', '--output_file', type=str, default=f'repos_data_{datetime.datetime.now().strftime("%Y%m%d-%H%M%S")}.csv', help='Output CSV file name')
+
     args = parser.parse_args()
 
     # Fetch all repositories
     all_repos = get_all_repos(args.github_token, args.org_name)
 
-    # Compare with old data or create CSV if not present
-    compare_with_old_data(all_repos, 'repos_data.csv')
-    
+    # Write the results to a CSV file
+    if all_repos:
+        with open(args.output_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Repo Name', 'Created At', 'Created By', 'Has .pre-commit-config.yaml', 'Has gitleaks_secret_scan.yml', 'Repo_Type', 'Branch Protection Enabled'])
+            for repo in all_repos:
+                writer.writerow([repo['name'], repo['created_at'], repo['creator'], repo['has_pre_commit_config'], repo['has_gitleaks_workflow'], repo['repo_type'], repo['branch_protection_enabled']])
+        print(f"Repositories have been written to '{args.output_file}'.")
+    else:
+        print(f"No repositories found in '{args.org_name}'")
+        
